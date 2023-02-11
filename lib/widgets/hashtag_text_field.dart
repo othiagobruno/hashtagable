@@ -25,7 +25,6 @@ export 'package:flutter/services.dart'
 typedef InputCounterWidgetBuilder = Widget? Function(
   /// The build context for the TextField.
   BuildContext context, {
-
   /// The length of the string currently in the input.
   required int currentLength,
 
@@ -82,40 +81,6 @@ class _TextFieldSelectionGestureDetectorBuilder
           break;
       }
     }
-  }
-
-  @override
-  void onSingleTapUp(TapUpDetails details) {
-    editableText.hideToolbar();
-    if (delegate.selectionEnabled) {
-      switch (Theme.of(_state.context).platform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          switch (details.kind) {
-            case PointerDeviceKind.mouse:
-            case PointerDeviceKind.stylus:
-            case PointerDeviceKind.invertedStylus:
-              // Precise devices should place the cursor at a precise position.
-              renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-              break;
-            case PointerDeviceKind.touch:
-            case PointerDeviceKind.unknown:
-              // On macOS/iOS/iPadOS a touch tap places the cursor at the edge
-              // of the word.
-              renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-              break;
-          }
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
-      }
-    }
-    _state._requestKeyboard();
-    if (_state.widget.onTap != null) _state.widget.onTap!();
   }
 
   @override
@@ -341,7 +306,6 @@ class HashTagTextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -415,18 +379,6 @@ class HashTagTextField extends StatefulWidget {
             'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
         keyboardType = keyboardType ??
             (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        toolbarOptions = toolbarOptions ??
-            (obscureText
-                ? const ToolbarOptions(
-                    selectAll: true,
-                    paste: true,
-                  )
-                : const ToolbarOptions(
-                    copy: true,
-                    cut: true,
-                    selectAll: true,
-                    paste: true,
-                  )),
         super(key: key);
 
   final ValueChanged<String>? onDetectionTyped;
@@ -556,13 +508,6 @@ class HashTagTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
-
-  /// Configuration of toolbar options.
-  ///
-  /// If not set, select all and paste will default to be enabled. Copy and cut
-  /// will be disabled if [obscureText] is true. If [readOnly] is true,
-  /// paste and cut will be disabled regardless.
-  final ToolbarOptions toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool? showCursor;
@@ -1285,7 +1230,6 @@ class _HashTagTextFieldState extends State<HashTagTextField>
           onDetectionTyped: widget.onDetectionTyped,
           decorateAtSign: widget.decorateAtSign,
           readOnly: widget.readOnly || !_isEnabled,
-          toolbarOptions: widget.toolbarOptions,
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,
           controller: controller,
